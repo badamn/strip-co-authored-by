@@ -1,0 +1,10 @@
+#!/bin/sh
+# commit-msg hook: strips "Co-authored-by:" trailers from the commit message.
+MSG_FILE="$1"
+TMP="$(mktemp)"
+# drop Co-authored-by lines (case-insensitive), then trim trailing blank lines
+grep -viE '^[[:space:]]*co-authored-by:' "$MSG_FILE" \
+  | awk '{ lines[NR] = $0 } END { n = NR; while (n > 0 && lines[n] ~ /^[[:space:]]*$/) n--; for (i = 1; i <= n; i++) print lines[i] }' \
+  > "$TMP"
+cat "$TMP" > "$MSG_FILE"
+rm -f "$TMP"
